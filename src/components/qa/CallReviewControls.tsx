@@ -7,14 +7,16 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { generateTicketDraft } from '@/lib/ticket-draft';
-import type { QAIssue } from '@/lib/data';
+import { RequestTicketEditor } from '@/components/requests/RequestTicketEditor';
+import { generateFromQAIssue } from '@/lib/request-ticket';
+import type { QAIssue, Call } from '@/lib/data';
 
 type Verdict = 'accepted' | 'rejected' | null;
 type ReviewStatus = 'open' | 'under_review' | 'escalated' | 'resolved';
 
 interface Props {
   issue: QAIssue;
+  call?: Call;
   clientName: string;
   voicebotName: string;
 }
@@ -31,12 +33,12 @@ function StatusBadge({ status, verdict }: { status: ReviewStatus; verdict: Verdi
   return <Badge className="bg-amber-500/15 text-amber-400 border border-amber-500/25">open</Badge>;
 }
 
-export function CallReviewControls({ issue, clientName, voicebotName }: Props) {
-  const [status,  setStatus]  = useState<ReviewStatus>(issue.status as ReviewStatus);
-  const [verdict, setVerdict] = useState<Verdict>(null);
+export function CallReviewControls({ issue, call, clientName, voicebotName }: Props) {
+  const [status,    setStatus]    = useState<ReviewStatus>(issue.status as ReviewStatus);
+  const [verdict,   setVerdict]   = useState<Verdict>(null);
   const [showDraft, setShowDraft] = useState(false);
 
-  const draft = generateTicketDraft(issue, clientName, voicebotName);
+  const draft = generateFromQAIssue(issue, call, clientName, voicebotName);
 
   function accept() { setStatus('resolved'); setVerdict('accepted'); }
   function reject() { setStatus('resolved'); setVerdict('rejected'); }
@@ -112,61 +114,18 @@ export function CallReviewControls({ issue, clientName, voicebotName }: Props) {
               <TicketCheck className="size-4" />
               Create Engineering Ticket
             </span>
-            {showDraft ? <ChevronUp className="size-4 text-muted-foreground" /> : <ChevronDown className="size-4 text-muted-foreground" />}
+            {showDraft
+              ? <ChevronUp className="size-4 text-muted-foreground" />
+              : <ChevronDown className="size-4 text-muted-foreground" />}
           </button>
 
           {showDraft && (
-            <div className="mt-4 space-y-4">
-              <Separator />
-
-              <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-widest mb-1">Title</p>
-                <p className="text-sm font-medium text-foreground">{draft.title}</p>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <p className="text-xs text-muted-foreground uppercase tracking-widest">Priority</p>
-                <Badge
-                  className={
-                    draft.priority === 'critical' || draft.priority === 'high'
-                      ? 'bg-amber-500/15 text-amber-400 border border-amber-500/25'
-                      : ''
-                  }
-                  variant={draft.priority === 'low' ? 'secondary' : 'outline'}
-                >
-                  {draft.priority}
-                </Badge>
-              </div>
-
-              <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-widest mb-1">Context</p>
-                <p className="text-xs text-foreground/80 leading-relaxed">{draft.context}</p>
-              </div>
-
-              <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-widest mb-1">User Story</p>
-                <p className="text-xs text-foreground/80 leading-relaxed italic">{draft.userStory}</p>
-              </div>
-
-              <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-widest mb-2">
-                  Acceptance Criteria
-                </p>
-                <ul className="space-y-1.5">
-                  {draft.acceptanceCriteria.map((ac, i) => (
-                    <li key={i} className="flex items-start gap-2 text-xs text-foreground/80">
-                      <span className="text-muted-foreground shrink-0 mt-0.5 font-mono">{i + 1}.</span>
-                      {ac}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="pt-2 border-t border-border">
-                <p className="text-xs text-muted-foreground/50">
-                  Demo environment — this draft is not persisted. In production, this would create a ticket in your engineering tracker.
-                </p>
-              </div>
+            <div className="mt-4">
+              <Separator className="mb-4" />
+              <RequestTicketEditor
+                draft={draft}
+                sourceLabel={`Generated from QA issue ${issue.id} · ${issue.callId}`}
+              />
             </div>
           )}
         </CardContent>

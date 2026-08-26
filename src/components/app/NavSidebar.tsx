@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 const NAV = [
   { label: 'Portfolio',   href: '/',           icon: LayoutDashboard, soon: false },
   { label: 'QA Review',   href: '/qa',         icon: Phone,           soon: false },
-  { label: 'Requests',    href: '/requests',   icon: TicketCheck,     soon: true  },
+  { label: 'Requests',    href: '/requests',   icon: TicketCheck,     soon: false },
   { label: 'Compliance',  href: '/compliance', icon: ShieldCheck,     soon: true  },
 ] as const;
 

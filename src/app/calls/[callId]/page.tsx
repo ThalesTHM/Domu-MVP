@@ -238,6 +238,7 @@ export default async function CallReviewPage({ params }: Props) {
               {/* Review controls + ticket creation (client component) */}
               <CallReviewControls
                 issue={issue}
+                call={call}
                 clientName={client?.name ?? call.clientId}
                 voicebotName={voicebot?.name ?? call.voicebotId}
               />
