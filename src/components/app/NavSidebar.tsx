@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Phone, TicketCheck, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { DevModeSwitcher } from '@/components/dev/DevModeSwitcher';
 
 const NAV = [
   { label: 'Portfolio',   href: '/',           icon: LayoutDashboard, soon: false },
@@ -61,6 +62,8 @@ export function NavSidebar() {
       <div className="px-4 py-3 border-t border-sidebar-border">
         <p className="text-[10px] text-muted-foreground/30 font-mono">v0.1.0 · demo</p>
       </div>
+
+      <DevModeSwitcher />
     </aside>
   );
 }

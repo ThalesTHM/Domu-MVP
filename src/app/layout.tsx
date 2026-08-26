@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Geist_Mono } from "next/font/google";
+import { cookies } from "next/headers";
 import { NavSidebar } from "@/components/app/NavSidebar";
 import "./globals.css";
 
@@ -19,17 +20,24 @@ export const metadata: Metadata = {
   description: "Internal portfolio monitoring and voicebot operations dashboard",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const isChallenge = (await cookies()).get('dataMode')?.value === 'challenge';
   return (
     <html
       lang="en"
       className={`${inter.variable} ${geistMono.variable} dark h-full`}
     >
       <body className="h-full flex flex-col bg-background text-foreground antialiased">
-        {/* Subtle demo notice — visible but not distracting */}
-        <div className="shrink-0 border-b border-border/30 py-[5px] text-center">
-          <span className="text-[10px] tracking-wide text-muted-foreground/35">
-            Demo environment · representative data
+        {/* Mode-aware demo notice */}
+        <div className={`shrink-0 border-b py-[5px] text-center ${
+          isChallenge ? 'border-amber-500/25' : 'border-border/30'
+        }`}>
+          <span className={`text-[10px] tracking-wide ${
+            isChallenge ? 'text-amber-400/70' : 'text-muted-foreground/35'
+          }`}>
+            {isChallenge
+              ? 'Development mode \u00b7 challenge-provided data'
+              : 'Demo environment \u00b7 representative data'}
           </span>
         </div>
 

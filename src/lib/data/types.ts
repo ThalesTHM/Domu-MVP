@@ -96,6 +96,11 @@ export interface QAIssue {
   recommendation: string;
   status: QAStatus;
   flaggedAt: string;   // ISO datetime
+  // Optional overrides used by challenge data to produce a specific ticket draft
+  customTicketTitle?: string;
+  customTicketUserStory?: string;
+  customTicketAC?: string[];
+  customTicketOpenQuestions?: string[];
 }
 
 export interface ClientRequest {

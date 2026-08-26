@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
-import { getQAIssues, getClients, getClient, getVoicebot } from '@/lib/data';
+import { getQAIssues, getClients, getClient, getVoicebot, challengeQAIssues } from '@/lib/data';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import {
@@ -13,6 +13,7 @@ import {
 import { QAFilters } from '@/components/qa/QAFilters';
 import { ArrowRight } from 'lucide-react';
 import type { QACategory, QASeverity, QAStatus } from '@/lib/data';
+import { getDataMode } from '@/lib/get-data-mode';
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -44,13 +45,15 @@ function str(v: string | string[] | undefined): string | undefined {
 
 export default async function QAQueuePage({ searchParams }: { searchParams: SearchParams }) {
   const sp = await searchParams;
+  const dataMode = await getDataMode();
 
   const clientFilter   = str(sp.client);
   const severityFilter = str(sp.severity) as QASeverity | undefined;
   const categoryFilter = str(sp.category) as QACategory | undefined;
   const statusFilter   = str(sp.status)   as QAStatus   | undefined;
 
-  const allIssues = getQAIssues();
+  // In challenge mode, use only challenge issues; otherwise use mock issues
+  const allIssues = dataMode === 'challenge' ? challengeQAIssues : getQAIssues();
   const clients   = getClients();
 
   // Summary stats from unfiltered list

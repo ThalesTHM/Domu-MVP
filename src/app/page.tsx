@@ -1,5 +1,5 @@
 ﻿import Link from 'next/link';
-import { getClients, getVoicebots } from '@/lib/data';
+import { getClients, getVoicebots, challengeClient, challengeQAIssues, challengeCalls } from '@/lib/data';
 import { getAllPriorities, type ClientPriority, type ClientStatus } from '@/lib/priorities';
 import { SparkLine } from '@/components/ui/SparkLine';
 import { Badge } from '@/components/ui/badge';
@@ -9,7 +9,8 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
 import type { Client } from '@/lib/data';
-import { AlertTriangle, TrendingDown } from 'lucide-react';
+import { AlertTriangle, ArrowRight } from 'lucide-react';
+import { getDataMode } from '@/lib/get-data-mode';
 
 function fmt(n: number) { return n.toLocaleString('en-US'); }
 function pct(n: number) { return n.toFixed(1) + '%'; }
@@ -44,7 +45,98 @@ function trendData(c: Client) { return c.stats.weekly.map((w) => w.paymentConver
 
 const STATUS_ORDER: Record<ClientStatus, number> = { critical: 0, needs_attention: 1, healthy: 2 };
 
-export default function DashboardPage() {
+// ── Challenge-mode dashboard ──────────────────────────────────────────────────
+
+function ChallengeDashboard() {
+  const criticalIssues = challengeQAIssues.filter((i) => i.severity === 'critical');
+  return (
+    <div className="px-6 py-6 space-y-5">
+      <div>
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-[10px] uppercase tracking-widest font-semibold text-amber-400 border border-amber-400/25 bg-amber-400/5 px-2 py-0.5 rounded-sm">
+            Challenge Data
+          </span>
+        </div>
+        <h1 className="text-base font-semibold text-foreground">Challenge Client — QA Review</h1>
+        <p className="text-xs text-muted-foreground mt-0.5">
+          {challengeCalls.length} challenge calls · {challengeQAIssues.length} QA findings · development mode
+        </p>
+      </div>
+
+      <div className="bg-amber-500/5 border border-amber-500/20 rounded-lg px-4 py-3">
+        <p className="text-xs text-amber-400/80 leading-relaxed">
+          These are challenge-provided call recordings from the Domu take-home exercise.
+          The same QA investigation workflow applies — open a call to review the transcript,
+          classify the finding, and generate an engineering ticket.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-3 gap-3">
+        {[
+          { label: 'Challenge Calls', value: String(challengeCalls.length) },
+          { label: 'QA Findings',     value: String(challengeQAIssues.length), alert: true },
+          { label: 'Critical',        value: String(criticalIssues.length),    alert: true },
+        ].map(({ label, value, alert }) => (
+          <Card key={label} size="sm">
+            <CardContent className="px-4 py-3">
+              <p className={`text-xl font-semibold font-mono tracking-tight ${alert ? 'text-destructive' : 'text-foreground'}`}>
+                {value}
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">{label}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        {challengeCalls.map((call) => {
+          const issue = challengeQAIssues.find((q) => q.callId === call.id);
+          return (
+            <Link key={call.id} href={`/calls/${call.id}`}
+              className="block bg-card border border-border rounded-lg px-4 py-4 hover:border-primary/40 transition-colors group">
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-mono text-xs text-muted-foreground">{call.id}</span>
+                {issue && (
+                  <Badge variant="destructive" className="text-[10px]">
+                    {issue.severity}
+                  </Badge>
+                )}
+              </div>
+              <p className="text-sm font-medium text-foreground mb-1">
+                {issue?.category === 'incorrect_statement' && call.id === 'CALL-HANNAH-001'
+                  ? 'Inconsistent identity data + contradictory financial amounts'
+                  : 'Contradictory payoff amount'}
+              </p>
+              <p className="text-xs text-muted-foreground line-clamp-1">
+                {issue?.evidence.slice(0, 80)}…
+              </p>
+              <div className="flex items-center gap-1 mt-3 text-xs text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                <span>Open call review</span>
+                <ArrowRight className="size-3" />
+              </div>
+            </Link>
+          );
+        })}
+      </div>
+
+      <div className="flex items-center gap-3">
+        <Link href="/qa?client=client-challenge"
+          className="text-xs text-primary hover:underline underline-offset-2 font-medium">
+          View all in QA Queue →
+        </Link>
+        <Link href="/clients/client-challenge"
+          className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+          Challenge Client Detail →
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+export default async function DashboardPage() {
+  const dataMode = await getDataMode();
+  if (dataMode === 'challenge') return <ChallengeDashboard />;
+
   const clients    = getClients();
   const voicebots  = getVoicebots();
   const priorities = getAllPriorities();

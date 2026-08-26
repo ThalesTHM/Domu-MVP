@@ -12,6 +12,13 @@ import { qaIssues } from './qa-issues';
 import { clientRequests } from './requests';
 import { engineeringTickets } from './tickets';
 import { callingPolicies } from './policies';
+import {
+  challengeClient,
+  challengeVoicebot,
+  challengeCalls,
+  challengeQAIssues,
+  challengeCallingPolicy,
+} from './challenge';
 
 import type {
   Client,
@@ -26,6 +33,9 @@ import type {
   QACategory,
 } from './types';
 
+// Re-export challenge data for direct use in challenge-mode views
+export { challengeClient, challengeCalls, challengeQAIssues };
+
 // ─── Clients ─────────────────────────────────────────────────────────────────
 
 export function getClients(): Client[] {
@@ -33,17 +43,20 @@ export function getClients(): Client[] {
 }
 
 export function getClient(id: string): Client | undefined {
+  if (id === 'client-challenge') return challengeClient;
   return clients.find((c) => c.id === id);
 }
 
 // ─── Voicebots ────────────────────────────────────────────────────────────────
 
 export function getVoicebots(clientId?: string): Voicebot[] {
+  if (clientId === 'client-challenge') return [challengeVoicebot];
   if (clientId) return voicebots.filter((v) => v.clientId === clientId);
   return voicebots;
 }
 
 export function getVoicebot(id: string): Voicebot | undefined {
+  if (id === 'vb-challenge-hannah') return challengeVoicebot;
   return voicebots.find((v) => v.id === id);
 }
 
@@ -68,7 +81,7 @@ export function getCalls(options: {
 }
 
 export function getCall(id: string): Call | undefined {
-  return calls.find((c) => c.id === id);
+  return calls.find((c) => c.id === id) ?? challengeCalls.find((c) => c.id === id);
 }
 
 // ─── QA Issues ────────────────────────────────────────────────────────────────
@@ -94,7 +107,7 @@ export function getQAIssue(id: string): QAIssue | undefined {
 }
 
 export function getQAIssueForCall(callId: string): QAIssue | undefined {
-  return qaIssues.find((q) => q.callId === callId);
+  return qaIssues.find((q) => q.callId === callId) ?? challengeQAIssues.find((q) => q.callId === callId);
 }
 
 // ─── Client Requests ──────────────────────────────────────────────────────────
@@ -127,6 +140,7 @@ export function getTicket(id: string): EngineeringTicket | undefined {
 // ─── Calling Policies ─────────────────────────────────────────────────────────
 
 export function getPolicy(clientId: string): CallingPolicy | undefined {
+  if (clientId === 'client-challenge') return challengeCallingPolicy;
   return callingPolicies.find((p) => p.clientId === clientId);
 }
 

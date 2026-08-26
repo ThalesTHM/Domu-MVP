@@ -132,16 +132,17 @@ export function generateFromQAIssue(
   };
 
   return {
-    title: `${clientName} — ${categoryTitle} remediation (${issue.callId})`,
+    // Use custom ticket fields from the issue when present (e.g. challenge data)
+    title: issue.customTicketTitle ?? `${clientName} — ${categoryTitle} remediation (${issue.callId})`,
     priority:
       issue.severity === 'critical' ? 'critical' :
       issue.severity === 'high'     ? 'high'     :
       issue.severity === 'medium'   ? 'medium'   : 'low',
     context,
-    userStory: USER_STORIES[issue.category]?.(voicebotName, clientName) ?? issue.recommendation,
-    acceptanceCriteria: AC[issue.category] ?? ['Acceptance criteria to be defined by engineering.'],
+    userStory: issue.customTicketUserStory ?? USER_STORIES[issue.category]?.(voicebotName, clientName) ?? issue.recommendation,
+    acceptanceCriteria: issue.customTicketAC ?? AC[issue.category] ?? ['Acceptance criteria to be defined by engineering.'],
     dependencies: DEPS[issue.category] ?? ['Engineering review required.'],
-    openQuestions: OQS[issue.category] ?? ['Scope and root cause to be confirmed.'],
+    openQuestions: issue.customTicketOpenQuestions ?? OQS[issue.category] ?? ['Scope and root cause to be confirmed.'],
     observability: OBS[issue.category] ?? '- Metrics to be defined by engineering.',
   };
 }
