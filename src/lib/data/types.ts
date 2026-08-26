@@ -82,6 +82,7 @@ export interface Call {
   phoneNumber: string;          // masked, e.g. +55 11 9****-4412
   debtorName: string;
   debtAmount: number;           // BRL
+  audioFile?: string;           // path served from public/ — e.g. /audio/filename.wav
 }
 
 export interface QAIssue {

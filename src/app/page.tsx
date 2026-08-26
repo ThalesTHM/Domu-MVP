@@ -103,9 +103,9 @@ function ChallengeDashboard() {
                 )}
               </div>
               <p className="text-sm font-medium text-foreground mb-1">
-                {issue?.category === 'incorrect_statement' && call.id === 'CALL-HANNAH-001'
-                  ? 'Inconsistent identity data + contradictory financial amounts'
-                  : 'Contradictory payoff amount'}
+                {call.id === 'CALL-HANNAH-001'
+                  ? 'Inconsistent names + contradictory balance ($143 / $1,086.86)'
+                  : 'Contradictory payoff amount ($2,992 / $1,630)'}
               </p>
               <p className="text-xs text-muted-foreground line-clamp-1">
                 {issue?.evidence.slice(0, 80)}…

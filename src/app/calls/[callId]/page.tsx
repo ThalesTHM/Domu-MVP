@@ -159,6 +159,24 @@ export default async function CallReviewPage({ params }: Props) {
             </CardContent>
           </Card>
 
+          {/* Audio player — shown only when challenge recording is available */}
+          {call.audioFile && (
+            <Card>
+              <CardContent className="px-5 py-4">
+                <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-widest mb-3">
+                  Recording
+                </h2>
+                <audio
+                  controls
+                  src={call.audioFile}
+                  className="w-full h-9"
+                  onError={(e) => { (e.currentTarget.parentElement as HTMLElement).style.display = 'none'; }}
+                />
+                <p className="text-xs text-muted-foreground/50 mt-2 font-mono">{call.audioFile}</p>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Transcript */}
           <Card>
             <CardContent className="px-5 py-4">
