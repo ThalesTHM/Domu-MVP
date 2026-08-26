@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getCall, getQAIssueForCall, getClient, getVoicebot, getRequests } from '@/lib/data';
 import { CallReviewControls } from '@/components/qa/CallReviewControls';
+import { AudioPlayer } from '@/components/ui/AudioPlayer';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -166,12 +167,7 @@ export default async function CallReviewPage({ params }: Props) {
                 <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-widest mb-3">
                   Recording
                 </h2>
-                <audio
-                  controls
-                  src={call.audioFile}
-                  className="w-full h-9"
-                  onError={(e) => { (e.currentTarget.parentElement as HTMLElement).style.display = 'none'; }}
-                />
+                <AudioPlayer src={call.audioFile} />
                 <p className="text-xs text-muted-foreground/50 mt-2 font-mono">{call.audioFile}</p>
               </CardContent>
             </Card>
