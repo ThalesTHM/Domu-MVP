@@ -93,9 +93,9 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      {/* Priority Actions */}
+      {/* Priority Actions — most prominent section */}
       {actionItems.length > 0 && (
-        <Card>
+        <Card className="border-l-2 border-l-primary">
           <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
             <AlertTriangle className="size-3.5 text-amber-400 shrink-0" />
             <span className="text-sm font-medium text-foreground">Priority Actions</span>
@@ -137,7 +137,7 @@ export default function DashboardPage() {
                 </span>
                 <Link
                   href={`/qa?client=${item.clientId}`}
-                  className="shrink-0 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  className="shrink-0 text-xs text-primary hover:text-primary/80 font-medium transition-colors"
                 >
                   Investigate →
                 </Link>

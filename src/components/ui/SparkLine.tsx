@@ -20,9 +20,9 @@ export function SparkLine({ data, width = 80, height = 24 }: SparkLineProps) {
     })
     .join(' ');
 
-  // Red if current value is meaningfully below starting value, green otherwise
+  // Use Domu palette: blue for stable/growing, red for declining
   const declining = data[data.length - 1] < data[0] * 0.95;
-  const stroke = declining ? '#f87171' : '#4ade80';
+  const stroke = declining ? '#ef4444' : '#2563eb';
 
   return (
     <svg

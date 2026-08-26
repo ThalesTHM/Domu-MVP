@@ -17,13 +17,17 @@ export function NavSidebar() {
 
   return (
     <aside className="w-[216px] shrink-0 flex flex-col h-full bg-sidebar border-r border-sidebar-border">
+      {/* Brand */}
       <div className="px-4 py-4 border-b border-sidebar-border">
-        <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium mb-0.5">
-          Domu Technology
-        </p>
-        <p className="text-sm font-semibold text-sidebar-foreground leading-tight">
-          Technical Operations
-        </p>
+        <div className="flex items-center gap-2.5">
+          <div className="size-6 rounded-sm bg-primary flex items-center justify-center shrink-0">
+            <span className="text-[11px] font-bold text-white leading-none">D</span>
+          </div>
+          <div>
+            <p className="text-[13px] font-semibold text-foreground leading-none tracking-tight">Domu</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5 tracking-wide">Technical Operations</p>
+          </div>
+        </div>
       </div>
 
       <nav className="flex-1 px-2 py-3 space-y-px">
@@ -37,15 +41,15 @@ export function NavSidebar() {
               className={cn(
                 'flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm transition-colors',
                 isActive
-                  ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
-                  : 'text-muted-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-foreground',
-                soon && 'pointer-events-none opacity-40',
+                  ? 'bg-primary/[0.08] text-primary font-medium'
+                  : 'text-muted-foreground hover:bg-muted/30 hover:text-foreground',
+                soon && 'pointer-events-none opacity-35',
               )}
             >
               <Icon className="size-4 shrink-0" aria-hidden="true" />
               {label}
               {soon && (
-                <span className="ml-auto text-[10px] tracking-wider uppercase text-muted-foreground/50">
+                <span className="ml-auto text-[10px] tracking-wider uppercase text-muted-foreground/40">
                   Soon
                 </span>
               )}
@@ -55,7 +59,7 @@ export function NavSidebar() {
       </nav>
 
       <div className="px-4 py-3 border-t border-sidebar-border">
-        <p className="text-[10px] text-muted-foreground/40 font-mono">v0.1.0-demo</p>
+        <p className="text-[10px] text-muted-foreground/30 font-mono">v0.1.0 · demo</p>
       </div>
     </aside>
   );

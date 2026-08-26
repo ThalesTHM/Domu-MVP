@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Geist_Mono } from "next/font/google";
 import { NavSidebar } from "@/components/app/NavSidebar";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
@@ -22,12 +23,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} dark h-full`}
+      className={`${inter.variable} ${geistMono.variable} dark h-full`}
     >
       <body className="h-full flex flex-col bg-background text-foreground antialiased">
-        {/* Persistent demo environment notice */}
-        <div className="shrink-0 bg-amber-950/50 border-b border-amber-800/30 py-1.5 text-center text-xs tracking-wide text-amber-300/70">
-          Demo environment — representative data
+        {/* Subtle demo notice — visible but not distracting */}
+        <div className="shrink-0 border-b border-border/30 py-[5px] text-center">
+          <span className="text-[10px] tracking-wide text-muted-foreground/35">
+            Demo environment · representative data
+          </span>
         </div>
 
         {/* App shell: sidebar + scrollable content */}
