@@ -142,9 +142,10 @@ const INPUT_CLS =
 export function ComplianceChecker() {
   const clients = getClients();
 
+  // Pre-fill the out-of-hours Beta Bank scenario so the demo opens ready
   const [clientId, setClientId] = useState('client-bb');
-  const [date,     setDate]     = useState('2026-08-26');
-  const [time,     setTime]     = useState('10:00');
+  const [date,     setDate]     = useState('2026-08-24');
+  const [time,     setTime]     = useState('20:52');
   const [result,   setResult]   = useState<CheckResult | null>(null);
 
   const policy = getPolicy(clientId);

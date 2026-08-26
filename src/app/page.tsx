@@ -175,7 +175,7 @@ export default function DashboardPage() {
             Client Portfolio
           </h2>
           <span className="text-xs text-muted-foreground/50">
-            sorted by priority Â· conv. rate = current week
+            sorted by priority · conv. rate = current week
           </span>
         </div>
 

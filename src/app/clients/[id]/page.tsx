@@ -94,10 +94,10 @@ export default async function ClientDetailPage({ params }: Props) {
   const convData    = client.stats.weekly.map((w) => w.paymentConversion);
   const answerData  = client.stats.weekly.map((w) => w.answerRate);
 
-  // First open/escalated QA issue — used for the Investigate CTA
-  const investigateIssue = qaIssues.find(
-    (q) => q.status === 'open' || q.status === 'escalated',
-  );
+  // Prefer the first OPEN issue — the primary demo path for new, actionable findings
+  const investigateIssue =
+    qaIssues.find((q) => q.status === 'open') ??
+    qaIssues.find((q) => q.status === 'escalated');
 
   const kpis = [
     { label: 'Calls',        value: fmt(client.stats.totalCalls),   alert: false                        },

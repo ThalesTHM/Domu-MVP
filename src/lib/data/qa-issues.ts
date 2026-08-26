@@ -14,7 +14,7 @@ export const qaIssues: QAIssue[] = [
     evidence: 'At 01:04, customer states: "I really do want to pay." At 01:14, customer requests human transfer. At 01:29, customer says "I want to pay something—" while call is terminated. Hannah\'s minimum-settlement-only logic did not account for flexible arrangements or partial payments. No escalation path offered.',
     recommendation: 'Update Hannah\'s payment negotiation flow to: (1) accept counter-offers below the settlement minimum and route to a human specialist; (2) offer PIX as an immediate low-friction payment option; (3) never terminate a call while the customer is speaking. Outcome classification must distinguish between "payment declined" and "payment blocked by bot logic".',
     status: 'open',
-    flaggedAt: '2026-08-20T17:45:00-03:00',
+    flaggedAt: '2026-08-26T09:30:00-03:00',
   },
 
   {
