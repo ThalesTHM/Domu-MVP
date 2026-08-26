@@ -151,12 +151,12 @@ export default async function QAQueuePage({ searchParams }: { searchParams: Sear
                       </Link>
                     </TableCell>
                     <TableCell className="text-sm">{voicebot?.name ?? issue.voicebotId}</TableCell>
-                    <TableCell>
+                    <TableCell className="max-w-0 w-full">
                       <Link href={`/calls/${issue.callId}`} className="block">
-                        <p className="text-sm font-medium text-foreground group-hover:underline underline-offset-2">
+                        <p className="text-sm font-medium text-foreground group-hover:underline underline-offset-2 truncate">
                           {QA_CATEGORY_LABELS[issue.category] ?? issue.category}
                         </p>
-                        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
+                        <p className="text-xs text-muted-foreground mt-0.5 truncate">
                           {issue.description}
                         </p>
                       </Link>

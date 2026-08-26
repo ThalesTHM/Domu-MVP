@@ -72,9 +72,9 @@ export default async function RequestsPage() {
                       {client?.name ?? req.clientId}
                     </Link>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="max-w-0 w-full">
                     <Link href={`/requests/${req.id}`} className="block">
-                      <p className="text-sm text-foreground group-hover:underline underline-offset-2 line-clamp-2">
+                      <p className="text-sm text-foreground group-hover:underline underline-offset-2 truncate">
                         {req.rawRequest}
                       </p>
                     </Link>
