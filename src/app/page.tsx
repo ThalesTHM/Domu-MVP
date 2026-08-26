@@ -89,7 +89,7 @@ export default function DashboardPage() {
       <div>
         <h1 className="text-base font-semibold text-foreground">Portfolio Dashboard</h1>
         <p className="text-xs text-muted-foreground mt-0.5">
-          {clients.length} active clients Â· 8-week performance summary
+          {clients.length} active clients · 8-week performance summary
         </p>
       </div>
 
@@ -123,7 +123,7 @@ export default function DashboardPage() {
                   >
                     {item.clientName}
                   </Link>
-                  <span className="text-muted-foreground mx-1.5">â€”</span>
+                  <span className="text-muted-foreground mx-1.5">—</span>
                   <span className="text-muted-foreground">{item.description}</span>
                 </div>
                 <span
@@ -135,6 +135,12 @@ export default function DashboardPage() {
                 >
                   {item.severity === 'critical' ? 'Critical' : 'Warning'}
                 </span>
+                <Link
+                  href={`/qa?client=${item.clientId}`}
+                  className="shrink-0 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Investigate →
+                </Link>
               </div>
             ))}
           </div>
@@ -233,7 +239,13 @@ export default function DashboardPage() {
                     <TableCell
                       className={`text-right font-mono text-sm font-medium tabular-nums ${metricColor(100 - client.stats.qaIssues, 85, 50)}`}
                     >
-                      {client.stats.qaIssues}
+                      {client.stats.qaIssues > 0 ? (
+                        <Link href={`/qa?client=${client.id}`} className="hover:underline underline-offset-2">
+                          {client.stats.qaIssues}
+                        </Link>
+                      ) : (
+                        client.stats.qaIssues
+                      )}
                     </TableCell>
 
                     <TableCell className="text-center">

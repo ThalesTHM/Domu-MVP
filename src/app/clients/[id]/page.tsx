@@ -271,7 +271,12 @@ export default async function ClientDetailPage({ params }: Props) {
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-widest">QA Issues</h2>
             {qaIssues.length > 0 && (
-              <span className="text-xs text-muted-foreground/50">{qaIssues.length} flagged</span>
+              <Link
+                href={`/qa?client=${client.id}`}
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {qaIssues.length} flagged · View all in QA Queue →
+              </Link>
             )}
           </div>
 
@@ -416,7 +421,16 @@ export default async function ClientDetailPage({ params }: Props) {
                         <TicketStatusBadge s={ticket.status} />
                       </div>
                     </div>
-                    <p className="text-sm font-medium text-foreground mb-1.5">{ticket.title}</p>
+                    {ticket.clientRequestId ? (
+                      <Link
+                        href={`/requests/${ticket.clientRequestId}`}
+                        className="text-sm font-medium text-foreground hover:underline underline-offset-2 block mb-1.5"
+                      >
+                        {ticket.title} →
+                      </Link>
+                    ) : (
+                      <p className="text-sm font-medium text-foreground mb-1.5">{ticket.title}</p>
+                    )}
                     <p className="text-xs text-muted-foreground leading-relaxed mb-3">
                       {trunc(ticket.context)}
                     </p>

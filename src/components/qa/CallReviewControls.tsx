@@ -19,6 +19,7 @@ interface Props {
   call?: Call;
   clientName: string;
   voicebotName: string;
+  linkedRequestId?: string; // pre-existing request for this client
 }
 
 function StatusBadge({ status, verdict }: { status: ReviewStatus; verdict: Verdict }) {
@@ -33,14 +34,14 @@ function StatusBadge({ status, verdict }: { status: ReviewStatus; verdict: Verdi
   return <Badge className="bg-amber-500/15 text-amber-400 border border-amber-500/25">open</Badge>;
 }
 
-export function CallReviewControls({ issue, call, clientName, voicebotName }: Props) {
+export function CallReviewControls({ issue, call, clientName, voicebotName, linkedRequestId }: Props) {
   const [status,    setStatus]    = useState<ReviewStatus>(issue.status as ReviewStatus);
   const [verdict,   setVerdict]   = useState<Verdict>(null);
   const [showDraft, setShowDraft] = useState(false);
 
   const draft = generateFromQAIssue(issue, call, clientName, voicebotName);
 
-  function accept() { setStatus('resolved'); setVerdict('accepted'); }
+  function accept() { setStatus('resolved'); setVerdict('accepted'); setShowDraft(true); }
   function reject() { setStatus('resolved'); setVerdict('rejected'); }
   function escalate() { setStatus('escalated'); setVerdict(null); }
 
@@ -88,11 +89,15 @@ export function CallReviewControls({ issue, call, clientName, voicebotName }: Pr
             </Button>
           </div>
 
-          {status === 'resolved' && (
+          {status === 'resolved' && verdict === 'accepted' && (
+            <div className="mt-3 pt-3 border-t border-border">
+              <p className="text-xs text-muted-foreground">Finding accepted. Issue logged for remediation.</p>
+              <p className="text-xs text-emerald-400 mt-1">↓ Engineering ticket generated below</p>
+            </div>
+          )}
+          {status === 'resolved' && verdict === 'rejected' && (
             <p className="text-xs text-muted-foreground mt-3 pt-3 border-t border-border">
-              {verdict === 'accepted'
-                ? 'Finding accepted. Issue logged for remediation.'
-                : 'Finding rejected. Issue closed without action.'}
+              Finding rejected. Issue closed without action.
             </p>
           )}
           {status === 'escalated' && (
@@ -126,6 +131,16 @@ export function CallReviewControls({ issue, call, clientName, voicebotName }: Pr
                 draft={draft}
                 sourceLabel={`Generated from QA issue ${issue.id} · ${issue.callId}`}
               />
+              {linkedRequestId && (
+                <div className="mt-4 pt-3 border-t border-border">
+                  <Link
+                    href={`/requests/${linkedRequestId}`}
+                    className="text-xs text-blue-400 hover:underline underline-offset-2"
+                  >
+                    View linked client request and full ticket →
+                  </Link>
+                </div>
+              )}
             </div>
           )}
         </CardContent>

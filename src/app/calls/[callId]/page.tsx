@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getCall, getQAIssueForCall, getClient, getVoicebot } from '@/lib/data';
+import { getCall, getQAIssueForCall, getClient, getVoicebot, getRequests } from '@/lib/data';
 import { CallReviewControls } from '@/components/qa/CallReviewControls';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -76,6 +76,8 @@ export default async function CallReviewPage({ params }: Props) {
   const issue    = getQAIssueForCall(callId);
   const client   = getClient(call.clientId);
   const voicebot = getVoicebot(call.voicebotId);
+  // First request for this client that has a linked ticket — for navigation after ticket creation
+  const linkedRequest = getRequests(call.clientId).find((r) => r.engineeringTicketId);
 
   return (
     <div className="px-6 py-6 space-y-5">
@@ -90,6 +92,16 @@ export default async function CallReviewPage({ params }: Props) {
           <BreadcrumbItem>
             <BreadcrumbLink render={<Link href="/qa" />}>QA Review</BreadcrumbLink>
           </BreadcrumbItem>
+          {client && (
+            <>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink render={<Link href={`/clients/${client.id}`} />}>
+                  {client.name}
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+            </>
+          )}
           <BreadcrumbSeparator />
           <BreadcrumbItem>
             <BreadcrumbPage className="font-mono">{callId}</BreadcrumbPage>
@@ -241,6 +253,7 @@ export default async function CallReviewPage({ params }: Props) {
                 call={call}
                 clientName={client?.name ?? call.clientId}
                 voicebotName={voicebot?.name ?? call.voicebotId}
+                linkedRequestId={linkedRequest?.id}
               />
             </>
           ) : (

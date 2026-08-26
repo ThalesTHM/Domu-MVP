@@ -1,0 +1,559 @@
+% Scope of Work — Domu Technical Operations Platform
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{geometry}
+\geometry{margin=1in}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=black,urlcolor=blue}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{float}
+\usepackage{parskip}
+\setlength{\parskip}{6pt}
+
+\title{\textbf{Scope of Work}\\[4pt]
+\large Domu Technical Operations Platform\\[2pt]
+\normalsize MVP \& Production Engineering}
+\author{Domu Technology Inc.}
+\date{\today}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+\begin{center}
+\textit{Demo environment — representative data only.
+Not for use with real customer information.}
+\end{center}
+\vfill
+\noindent Version: 1.0 \quad Date: \today
+\newpage
+\tableofcontents
+\newpage
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Executive Summary}
+% ─────────────────────────────────────────────────────────────────────────────
+
+The challenge describes a Technical Operations workflow that requires substantial manual coordination across client performance monitoring, QA investigation, engineering requests, and compliance-related operations. As client and call volume grows, these workflows can become a bottleneck and create opportunities for standardization and automation.
+
+This document scopes an MVP and production Technical Operations platform that automates high-value repetitive workflows, surfaces operational intelligence, and routes the right issues to the right people — while preserving human control over consequential decisions.
+
+The MVP focuses on three core capabilities: portfolio performance monitoring, QA call investigation, and client-request-to-ticket conversion. Four additional workflows are scoped for production. The SOW defines what the MVP proves, what production engineering must build, and how the system handles security, AI, observability, testing, and deployment.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Problem Statement}
+% ─────────────────────────────────────────────────────────────────────────────
+
+The challenge describes a Technical Operations Lead managing approximately 7 active clients and multiple voicebots who needs to:
+
+\begin{itemize}
+  \item Monitor client performance for degradation such as answer-rate or conversion drops and QA issue spikes.
+  \item Review flagged calls, classify issues, assess severity, and formulate recommendations.
+  \item Translate unstructured client requests into engineering-ready tickets.
+  \item Verify whether proposed call attempts comply with configured calling-window rules.
+  \item Investigate compliance escalations, voicebot behavior regressions, and new-client onboarding workflows.
+\end{itemize}
+
+These workflows contain repetitive components that are strong candidates for standardization and automation, allowing senior operational staff to focus more of their time on investigation, judgment, and client outcomes.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Proposed Solution}
+% ─────────────────────────────────────────────────────────────────────────────
+
+A purpose-built Technical Operations platform that:
+
+\begin{enumerate}
+  \item Surfaces a single prioritized portfolio view of all client/voicebot performance.
+  \item Provides a structured QA investigation workflow with AI-assisted transcript classification and human-controlled dispositions.
+  \item Converts unstructured client requests into engineering-ready ticket drafts, surfacing open questions before work begins.
+  \item Deterministically validates calling-window compliance against versioned client/regional policies.
+  \item In production: supports structured voicebot flow creation, prompt diagnosis, and compliance investigation.
+\end{enumerate}
+
+Deterministic logic handles rule-based tasks. AI assists with unstructured text. Humans retain final control over all consequential decisions.
+
+\medskip
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{c@{\quad$\rightarrow$\quad}c@{\quad$\rightarrow$\quad}c@{\quad$\rightarrow$\quad}c}
+\textbf{MONITOR} & \textbf{INVESTIGATE} & \textbf{ACT} & \textbf{MEASURE} \\
+\scriptsize Portfolio performance & \scriptsize QA calls, transcripts, & \scriptsize Engineering tickets, & \scriptsize Operational outcomes \\
+\scriptsize and client signals & \scriptsize root-cause analysis & \scriptsize remediation, approved changes & \scriptsize and performance changes
+\end{tabular}
+\renewcommand{\arraystretch}{1}
+\end{center}
+\smallskip
+
+The platform is designed around a closed operational loop: detect a problem, investigate evidence, take a controlled action, and measure the resulting outcome.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{MVP Scope and Prioritization}
+% ─────────────────────────────────────────────────────────────────────────────
+
+The challenge asks for automation of \emph{some} repetitive operations tasks. This MVP demonstrates three core workflows using representative seeded data. Remaining workflows are scoped for production.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{p{0.05\linewidth}p{0.42\linewidth}p{0.18\linewidth}p{0.26\linewidth}}
+\toprule
+\textbf{\#} & \textbf{Capability} & \textbf{Priority} & \textbf{MVP?} \\
+\midrule
+1 & Portfolio Performance Monitoring   & Core MVP           & \textbf{Yes — seeded data} \\
+2 & QA / Voicebot Call Investigation    & Core MVP           & \textbf{Yes — seeded data} \\
+3 & Client Request → Engineering Ticket & Core MVP           & \textbf{Yes — seeded data} \\
+4 & Calling-Window Validation           & Supporting         & \textbf{Yes — demo rules} \\
+5 & Client Script → Voicebot Flow       & Extended           & Production only \\
+6 & Voicebot Prompt Diagnosis           & Extended           & Production only \\
+7 & Compliance Concern Investigation    & Extended           & Production only \\
+\bottomrule
+\end{tabular}
+\caption{Feature prioritization and MVP scope.}
+\end{table}
+
+The MVP uses representative seeded data with no production credentials and no real customer information. The UI clearly identifies the demo environment.
+
+Features 5--7 are intentionally excluded from the MVP implementation. They represent additional production capabilities identified from the broader Technical Operations workflow in the challenge and can be evaluated after the core MVP has been validated.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Functional Capabilities}
+% ─────────────────────────────────────────────────────────────────────────────
+
+\subsection{Feature 1 — Portfolio Performance Monitoring}
+
+\textbf{Objective.} Answer: \emph{"Across all active clients, where do I need to spend my attention right now?"} The portfolio view provides deterministic KPIs, per-client status, and a prioritized action list without requiring the operator to query each account manually.
+
+\textbf{MVP.} Dashboard with seeded data showing portfolio-level and per-client KPIs, a client performance table (answer rate, payment conversion, QA issue count, trend, status), a prioritized action list, and client-detail drill-down. All calculations use standard arithmetic — no AI for metrics.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{p{0.28\linewidth}p{0.65\linewidth}}
+\toprule
+\textbf{Metric} & \textbf{Definition} \\
+\midrule
+Answer Rate         & Answered calls / total calls \\
+Payment Conversion  & Payments / answered calls \\
+QA Issue Count      & Open issues associated with the client \\
+Client Status       & Deterministic: Healthy / Needs Attention / Critical \\
+\bottomrule
+\end{tabular}
+\caption{Core portfolio metrics (deterministic).}
+\end{table}
+
+\textbf{Production direction.} Replace seeded data with authenticated integrations to call-event, outcome, QA, and client-configuration sources. Add freshness indicators, ingestion-failure visibility, configurable thresholds, client/account permissions, and KPI reconciliation.
+
+\textbf{Acceptance criteria.}
+\begin{enumerate}
+  \item KPIs computed correctly from seeded data; no hard-coded display values.
+  \item Division-by-zero handled safely (display "N/A" or equivalent).
+  \item At least one client clearly flagged in the demo data set.
+  \item Priority actions identify a specific problem, not a generic flag.
+  \item Demo environment label visible; no implication of real data.
+\end{enumerate}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\subsection{Feature 2 — QA / Voicebot Call Investigation}
+
+\textbf{Objective.} Answer: \emph{"What went wrong in this call, why, and what should I do next?"} Reduces manual effort required to locate, classify, and action problematic calls.
+
+\textbf{MVP.} QA queue with flagged calls (filterable by client, severity, category, status), call-detail view with transcript, AI-assisted or seeded classification (category, severity, evidence, recommendation), human review actions (Accept / Reject / Escalate), and engineering-ticket handoff. Uses the challenge-supplied Hannah voicebot and call recordings. The MVP demonstration should include at least one of the challenge-supplied Hannah calls as a concrete QA investigation example.
+
+\textbf{Production direction.} Real call/transcript integrations, automated QA sampling, model versioning, labeled evaluation data, regression evaluation before model/prompt changes, and full auditability per the global auditability requirements.
+
+\textbf{Human control.} The system must not automatically modify voicebots, deploy configuration, or make compliance determinations. Human review is required before findings are actioned.
+
+\textbf{Acceptance criteria.}
+\begin{enumerate}
+  \item Queue loads; operator can filter by client, severity, and status.
+  \item Each finding has category, severity, evidence, and recommendation.
+  \item Evidence is traceable to a specific transcript segment.
+  \item Accept / Reject / Escalate update finding state correctly.
+  \item Engineering-ticket handoff populates all required fields.
+  \item Demo remains deterministic without a live external AI service.
+\end{enumerate}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\subsection{Feature 3 --- Client Request \texorpdfstring{$\rightarrow$}{->} Engineering Ticket}
+
+\textbf{Objective.} Convert unstructured client requests into engineering-ready work items, surfacing open questions before work begins rather than after.
+
+\textbf{MVP.} Client request view, AI-assisted structured ticket generation (title, user story, acceptance criteria, dependencies, open questions, priority, observability considerations), editable draft, copy/export, and QA-issue-to-ticket handoff. Reference scenario: \emph{"We'd like customers to be able to pay via Pix."}
+
+\textbf{Production direction.} Engineering issue-tracker integration (create, link, sync status), full traceability from original request through implementation and measurement.
+
+\textbf{Human control.} Generated output is always a draft. The operator must review and approve every field before the ticket is marked ready for engineering.
+
+\textbf{Acceptance criteria.}
+\begin{enumerate}
+  \item Structured ticket generated from representative request includes all required fields.
+  \item Open questions explicitly listed; known vs. unknown clearly distinguished.
+  \item All fields editable; draft status visible.
+  \item QA-issue context pre-populates relevant ticket fields.
+  \item Demo works without a live external AI service.
+\end{enumerate}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\subsection{Feature 4 — Calling-Window Validation}
+
+\textbf{Objective.} Determine whether a proposed call is allowed under the configured client/region calling policy. Deterministic, explainable, and auditable — not a legal determination.
+
+\textbf{MVP.} Operator selects client, region, and proposed date/time. System evaluates against seeded calling policy (timezone, allowed window, holidays) and returns: \textbf{ALLOWED / BLOCKED / HOLIDAY / REQUIRES REVIEW} with a human-readable explanation. Logic is standard application code — no AI.
+
+\textbf{Production direction.} Versioned managed policy data, reliable timezone and holiday sources, auditability of decisions (client, region, timestamp, policy version, result), exception-handling workflow.
+
+\textbf{Acceptance criteria.}
+\begin{enumerate}
+  \item Correct result for in-window, out-of-window, and holiday cases.
+  \item Missing or ambiguous policy returns REQUIRES REVIEW, not a guessed result.
+  \item Every result includes a human-readable explanation and the policy used.
+  \item Evaluation uses target-region timezone, not operator's local time.
+\end{enumerate}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\subsection{Feature 5 --- Client Script \texorpdfstring{$\rightarrow$}{->} Structured Voicebot Flow \textnormal{(Extended)}}
+
+\textbf{Objective.} Convert an unstructured client-provided script into a structured voicebot conversation flow (branches, conditions, draft prompt), ready for human review and controlled deployment.
+
+\textbf{Production direction.} AI-assisted extraction of conversation branches and conditions, operator review and editing, versioning of generated flows, human approval gate before any production voicebot deployment, rollback to previous known-good version, regression evaluation for behavior-change validation. Autonomous production deployment is explicitly out of scope.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\subsection{Feature 6 — Voicebot Prompt Diagnosis \& Improvement \textnormal{(Extended)}}
+
+\textbf{Objective.} Investigate a client report of poor voicebot behavior, identify the root cause, propose a targeted prompt/workflow change, and validate the change before staged production rollout.
+
+\textbf{Production direction.} Call evidence review, observed-vs-expected behavior comparison, inspection of relevant prompt/workflow branch, AI-assisted change proposal, regression testing with representative scenarios, human approval, staged rollout, and performance measurement. Engineering handoff when the root cause is not prompt-related.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\subsection{Feature 7 — Compliance Concern Investigation \textnormal{(Extended)}}
+
+\textbf{Objective.} Investigate a client escalation about a voicebot statement or behavior that may violate a business or regulatory requirement. Produce a structured internal finding and a draft client response for human review.
+
+\textbf{Scope distinction.} Calling-Window Validation asks \emph{"Was this call permitted?"}. Compliance Concern Investigation asks \emph{"Did something during this call potentially violate a requirement?"}
+
+\textbf{Production direction.} Client escalation preserved verbatim, call identification, transcript evidence review, versioned policy/rule reference, observed-vs-expected comparison, AI-assisted investigation draft (advisory only), operator-assigned severity (Low / Medium / High / Critical), structured internal investigation record, client-response draft clearly marked "DRAFT — REQUIRES HUMAN REVIEW", human review and disposition (Confirm / Reject / Insufficient Evidence / Escalate), remediation tracking linked to QA or engineering work, full audit trail. This capability is not legal advice and does not replace compliance or legal professionals.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Production Architecture}
+% ─────────────────────────────────────────────────────────────────────────────
+
+\subsection{Conceptual Data Flow}
+
+\begin{center}
+\small
+\begin{tabular}{c}
+Source Systems \\
+(calls, outcomes, transcripts, voicebot config, QA, client config, policies, engineering tracker) \\
+$\downarrow$ \\
+Data Ingestion (authenticated, validated, deduplicated) \\
+$\downarrow$ \\
+Normalization / Validation \\
+$\downarrow$ \\
+Operational Data Layer \\
+$\downarrow$ \\
+Rules Engine / AI Services \\
+$\downarrow$ \\
+Technical Operations Application \\
+$\downarrow$ \\
+Human Action \\
+$\downarrow$ \\
+Downstream Systems \\
+$\downarrow$ \\
+Measurement
+\end{tabular}
+\end{center}
+
+A shared operational data layer serves all seven workflows, eliminating duplicate pipelines and business logic per feature.
+
+\subsection{Core Data Model}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{p{0.22\linewidth}p{0.70\linewidth}}
+\toprule
+\textbf{Entity} & \textbf{Key Attributes} \\
+\midrule
+Client                       & id, name, status, configuration, supported regions \\
+Voicebot                     & id, clientId, name, active version, configuration reference, status \\
+Call                         & id, clientId, voicebotId, timestamp, duration, outcome, answer status, transcript reference, config version \\
+QA Issue                     & id, callId, clientId, category, severity, evidence, recommendation, review state, reviewer \\
+Client Request               & id, clientId, original request, structured requirement, status \\
+Engineering Ticket           & id, clientId, source request/issue, title, acceptance criteria, priority, status, external reference \\
+Calling Policy               & id, clientId, region, timezone, allowed window, holiday config, effective date, version \\
+Voicebot Config Version      & id, voicebotId, version, prompt reference, approvedBy, status, effective date \\
+\bottomrule
+\end{tabular}
+\caption{Core operational data entities.}
+\end{table}
+
+\subsection{Ingestion and Data Quality}
+
+Production ingestion must support: authenticated access, schema and input validation, duplicate detection and idempotency, retry/dead-letter handling, operator-visible failure states, source identifier preservation, and data freshness indicators (e.g., "Last updated 4 min ago" / "Ingestion delayed 47 min").
+
+Data-quality failures must be visible. The platform must not silently compute misleading KPIs from incomplete data.
+
+\subsection{Versioning and Source-of-Truth}
+
+Voicebot configuration, calling policies, prompt templates, QA taxonomy, and AI/model configurations must be versioned so the system can answer: \emph{"Which configuration and policy were active when this call occurred?"}
+
+The platform maintains references to source-of-truth systems (call platform, payment system, engineering tracker) rather than replacing them.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Data \& Integrations}
+% ─────────────────────────────────────────────────────────────────────────────
+
+The MVP uses seeded representative data. Production integrations connect to source systems via authenticated interfaces. The SOW does not assume specific technologies or vendors; implementation choices will be aligned with the team's existing infrastructure standards and engineering practices.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{p{0.35\linewidth}p{0.55\linewidth}}
+\toprule
+\textbf{Source Category} & \textbf{Consumed By} \\
+\midrule
+Call events and outcomes    & Features 1, 2, 4, 6, 7 \\
+Transcripts                 & Features 2, 6, 7 \\
+Voicebot configuration      & Features 2, 5, 6 \\
+QA results                  & Features 1, 2 \\
+Client configuration        & All features \\
+Calling policies / calendar & Feature 4 \\
+Engineering tracker         & Feature 3 \\
+Payment / outcome systems   & Feature 1 \\
+\bottomrule
+\end{tabular}
+\caption{Source-system consumption by feature.}
+\end{table}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{AI-Assisted Automation \& Human Oversight}
+% ─────────────────────────────────────────────────────────────────────────────
+
+\subsection{Task Allocation}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{p{0.30\linewidth}p{0.62\linewidth}}
+\toprule
+\textbf{Approach} & \textbf{Tasks} \\
+\midrule
+\textbf{Deterministic} (no AI) &
+  KPI calculations, calling-window evaluation, holiday checks, status/priority rules, field validation \\[4pt]
+\textbf{AI-assisted} &
+  Transcript classification and summarization, requirement extraction from client requests, ticket drafting, prompt change proposals, compliance investigation assistance \\[4pt]
+\textbf{Human-controlled only} &
+  Compliance decisions, production prompt/config deployments, high-risk QA finding dispositions, final client-facing responses \\
+\bottomrule
+\end{tabular}
+\caption{Task allocation: deterministic, AI-assisted, and human-controlled.}
+\end{table}
+
+\subsection{AI Governance}
+
+\begin{itemize}
+  \item \textbf{Traceability.} Every AI-generated finding is linked to its source call, transcript segment, and model/prompt version.
+  \item \textbf{Evidence first.} AI output identifies evidence; it does not substitute for it.
+  \item \textbf{Evaluation dataset.} Production maintains a labeled dataset for regression evaluation before model or prompt changes.
+  \item \textbf{Human override.} Operators can accept, reject, or escalate any AI-generated finding.
+  \item \textbf{Prompt versioning.} Prompt templates are versioned alongside application code. Changes require review and staging before production rollout.
+  \item \textbf{AI data boundary.} Only data required for the specific AI task is sent to an external AI service. PII and sensitive content are redacted where technically feasible. AI inputs, outputs, and model versions are logged.
+\end{itemize}
+
+The MVP may implement AI-assisted features using deterministic templates, controlled model output, or mock AI services, provided the demo is reproducible without an unreliable live external dependency.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Security \& Compliance}
+% ─────────────────────────────────────────────────────────────────────────────
+
+The following requirements apply to all production capabilities. Individual features note additional feature-specific considerations where relevant.
+
+\begin{itemize}
+  \item \textbf{Authentication \& access.} All production endpoints require authenticated access. SSO integration where appropriate to the deployment environment.
+  \item \textbf{RBAC.} Role-based access control with least-privilege defaults. Operational roles separated from administrative roles.
+  \item \textbf{Tenant/client isolation.} Strict data isolation between client accounts. No cross-client data access.
+  \item \textbf{PII minimization.} Collect and process only the data required. Avoid persisting sensitive customer data unnecessarily.
+  \item \textbf{Transcript and audio access.} Access to call transcripts and recordings restricted by role and client scope.
+  \item \textbf{Encryption.} Data encrypted in transit and at rest.
+  \item \textbf{Audit logging.} All significant operational actions logged with user identity, timestamp, and record identifier. Human actions distinguished from system-generated actions.
+  \item \textbf{Retention policies.} Data retained only as long as operationally and legally required.
+  \item \textbf{AI input boundaries.} AI services receive only the minimum data required. Inputs logged alongside AI outputs and model versions.
+  \item \textbf{Production/development separation.} Development credentials must not provide production access.
+\end{itemize}
+
+The MVP does not require full production security infrastructure. The MVP must not use real customer data.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Observability \& Reliability}
+% ─────────────────────────────────────────────────────────────────────────────
+
+\subsection{System Observability}
+
+\begin{itemize}
+  \item API latency and error rates
+  \item Ingestion pipeline health, lag, and failure states
+  \item Job/queue failures
+  \item Data freshness — last successful refresh visible to operators
+  \item Deployment health and version in flight
+\end{itemize}
+
+\subsection{Operational Observability}
+
+\begin{itemize}
+  \item Call volume, answer rate, payment conversion per client
+  \item QA issue rate and open-issue backlog
+  \item Calling-window violations
+  \item AI finding acceptance/rejection rates (quality proxy)
+\end{itemize}
+
+Degraded states must be visible to operators before they affect decisions (e.g., "Call data delayed — KPIs may be stale"). Alerts should be defined for critical ingestion failures and significant metric regressions.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Testing \& Quality Assurance}
+% ─────────────────────────────────────────────────────────────────────────────
+
+\begin{itemize}
+  \item \textbf{Unit tests.} All deterministic logic: KPI calculations, calling-window evaluation, policy-precedence rules, field-validation logic.
+  \item \textbf{Integration tests.} Data ingestion, normalization, entity relationships, API contracts.
+  \item \textbf{End-to-end tests.} Core MVP workflows from data input to operator-facing output.
+  \item \textbf{Golden dataset.} Labeled representative calls and requests for regression testing of AI-assisted classification and ticket generation.
+  \item \textbf{AI evaluation.} Before any model or prompt change, regression evaluation against the golden dataset. Agreed accuracy thresholds define a passing gate.
+  \item \textbf{Security testing.} Tenant isolation, access-control boundaries, input validation.
+  \item \textbf{Acceptance testing.} Per-feature acceptance criteria (Sections 5.1–5.4) verified against the demo environment.
+\end{itemize}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Deployment / CI/CD / Environments}
+% ─────────────────────────────────────────────────────────────────────────────
+
+\subsection{MVP Deployment}
+
+The MVP will be deployed to an accessible URL for evaluation and will use representative seeded data only. It will not contain production credentials or real customer information.
+
+\subsection{Production Environments}
+
+\begin{itemize}
+  \item \textbf{Development} — feature work, local testing.
+  \item \textbf{Staging} — integration testing, production-like validation, AI/prompt regression.
+  \item \textbf{Production} — real client operations, approved workflows only.
+\end{itemize}
+
+Configuration, credentials, and data access are isolated between environments.
+
+\subsection{CI/CD Pipeline}
+
+Automated pipeline: source checkout → dependency install → lint / static analysis → unit tests → integration tests → build → security/dependency scan → staging deployment → staging validation → controlled production promotion. Releases must not require undocumented manual steps.
+
+\subsection{Quality Gates, Rollback, and Configuration}
+
+Failed tests, failed builds, or critical security issues block production promotion. Every production change has a defined rollback path. Secrets are managed through a secure mechanism (not source control). Environment-specific configuration is separated from application code. Data migrations are versioned and validated. AI/prompt changes are versioned, regression-evaluated, and staged before broad rollout.
+
+Implementation technology (language, framework, cloud provider, CI/CD vendor, database, IaC tool) is not mandated by this SOW; decisions are made during engineering discovery aligned with Domu's existing standards.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Rollout Plan}
+% ─────────────────────────────────────────────────────────────────────────────
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{p{0.12\linewidth}p{0.25\linewidth}p{0.55\linewidth}}
+\toprule
+\textbf{Phase} & \textbf{Name} & \textbf{Scope} \\
+\midrule
+0 & MVP / Proof of Concept &
+  Demo environment, seeded data, Features 1–4, interview evaluation. \\
+1 & Single-client Pilot &
+  Features 1–4 on production-connected data for one client. Success criteria defined before Phase 2. \\
+2 & Multi-client Rollout &
+  Expand to additional clients after pilot success. Evaluate and introduce Features 5--7 based on pilot findings, business priority, and engineering readiness. \\
+3 & Scale \& Automation &
+  Full portfolio, extended automation, performance tuning. \\
+\bottomrule
+\end{tabular}
+\caption{Phased rollout.}
+\end{table}
+
+Each phase uses feature flags for controlled exposure and retains rollback capability. Success criteria are defined and measured before promotion to the next phase.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Risks, Assumptions \& Dependencies}
+% ─────────────────────────────────────────────────────────────────────────────
+
+\subsection{Risks}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{p{0.35\linewidth}p{0.57\linewidth}}
+\toprule
+\textbf{Risk} & \textbf{Mitigation} \\
+\midrule
+AI hallucination or incorrect classification  & Evidence traceability + human review + golden-dataset regression evaluation \\
+Bad or incomplete source data                 & Schema validation + reconciliation + freshness monitoring + visible failure states \\
+Prompt/model regression                       & Regression suite + staged rollout + rollback \\
+Compliance false positive or false negative   & Human review required; AI advisory only; policy version referenced \\
+Client-data exposure                          & RBAC + tenant isolation + PII minimization + audit logging \\
+Operational overload on operators             & Prioritization logic + automation of repetitive tasks + alerting \\
+Scope creep into extended features            & Explicit MVP/production distinction; phase gates before new capabilities \\
+\bottomrule
+\end{tabular}
+\caption{Risk register.}
+\end{table}
+
+\subsection{Assumptions}
+
+\begin{itemize}
+  \item Production source systems exist or can be instrumented to expose required operational data via authenticated interfaces.
+  \item Engineering can provide integration support for ingestion and downstream system connections.
+  \item Client calling policies can be expressed as structured, versioned configuration data.
+  \item Compliance policy/rules are defined and maintained by the responsible business/compliance team.
+  \item Production architecture will align with Domu's existing technology standards and engineering practices.
+\end{itemize}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Non-Goals}
+% ─────────────────────────────────────────────────────────────────────────────
+
+\begin{itemize}
+  \item Replacing the voicebot runtime or call platform
+  \item Replacing Domu's source-of-truth financial or transactional systems
+  \item Replacing the engineering issue tracker
+  \item Autonomous regulatory or legal determinations
+  \item Autonomous production prompt or configuration deployment (human approval always required)
+  \item Building a general-purpose data warehouse or BI platform
+  \item Fully autonomous Technical Operations (human oversight is a core design principle)
+  \item Prescribing Domu's internal technology choices (cloud, language, vendor)
+\end{itemize}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Definition of Done}
+% ─────────────────────────────────────────────────────────────────────────────
+
+Production readiness requires all of the following:
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{p{0.18\linewidth}p{0.74\linewidth}}
+\toprule
+\textbf{Area} & \textbf{Criteria} \\
+\midrule
+Functional  & Core workflows (Features 1–4) operate correctly on production-connected data; extended features pass staging acceptance tests before promotion. \\
+Data        & KPIs reconcile with source systems; freshness visible; ingestion failures operator-visible. \\
+AI          & AI evaluation meets agreed accuracy thresholds on golden dataset; high-risk decisions require human review; model/prompt versions tracked. \\
+Security    & RBAC, tenant isolation, audit logging, and access controls verified; security review completed. \\
+Observability & System and operational metrics instrumented; alerts configured for critical failures. \\
+Deployment  & CI/CD pipeline operational; quality gates enforced; rollback tested. \\
+Rollout     & Phase 1 pilot success criteria met and documented before Phase 2 promotion. \\
+\bottomrule
+\end{tabular}
+\caption{Production definition of done.}
+\end{table}
+
+\end{document}
