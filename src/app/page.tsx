@@ -1,36 +1,42 @@
-import Link from 'next/link';
+﻿import Link from 'next/link';
 import { getClients, getVoicebots } from '@/lib/data';
 import { getAllPriorities, type ClientPriority, type ClientStatus } from '@/lib/priorities';
 import { SparkLine } from '@/components/ui/SparkLine';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from '@/components/ui/table';
 import type { Client } from '@/lib/data';
+import { AlertTriangle, TrendingDown } from 'lucide-react';
 
 function fmt(n: number) { return n.toLocaleString('en-US'); }
 function pct(n: number) { return n.toFixed(1) + '%'; }
 
 function StatusBadge({ status }: { status: ClientStatus }) {
-  const cfg = {
-    critical: {
-      dot: 'bg-red-400', text: 'text-red-400', bg: 'bg-red-950', border: 'border-red-900', label: 'Critical',
-    },
-    needs_attention: {
-      dot: 'bg-amber-400', text: 'text-amber-400', bg: 'bg-amber-950', border: 'border-amber-900', label: 'Attention',
-    },
-    healthy: {
-      dot: 'bg-emerald-400', text: 'text-emerald-400', bg: 'bg-emerald-950/40', border: 'border-emerald-900/50', label: 'Healthy',
-    },
-  }[status];
-
+  if (status === 'critical') {
+    return <Badge variant="destructive">Critical</Badge>;
+  }
+  if (status === 'needs_attention') {
+    return (
+      <Badge className="bg-amber-500/15 text-amber-400 border border-amber-500/25 hover:bg-amber-500/20">
+        Attention
+      </Badge>
+    );
+  }
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium border ${cfg.bg} ${cfg.text} ${cfg.border}`}>
-      <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
-      {cfg.label}
-    </span>
+    <Badge className="bg-emerald-500/15 text-emerald-400 border border-emerald-500/25 hover:bg-emerald-500/20">
+      Healthy
+    </Badge>
   );
 }
 
-function answerColor(r: number) { return r < 40 ? 'text-red-400' : r < 58 ? 'text-amber-400' : 'text-slate-200'; }
-function convColor(r: number)   { return r < 22 ? 'text-red-400' : r < 30 ? 'text-amber-400' : 'text-slate-200'; }
-function qaColor(n: number)     { return n > 50 ? 'text-red-400' : n > 15 ? 'text-amber-400' : 'text-slate-400'; }
+function metricColor(value: number, warnBelow: number, critBelow: number): string {
+  if (value < critBelow) return 'text-destructive';
+  if (value < warnBelow) return 'text-amber-400';
+  return 'text-foreground';
+}
 
 function currConv(c: Client)  { return c.stats.weekly.at(-1)?.paymentConversion ?? c.stats.paymentConversion; }
 function deltaPP(c: Client)   { return currConv(c) - (c.stats.weekly.at(0)?.paymentConversion ?? currConv(c)); }
@@ -44,7 +50,6 @@ export default function DashboardPage() {
   const priorities = getAllPriorities();
   const priMap     = Object.fromEntries(priorities.map((p) => [p.clientId, p]));
 
-  // Portfolio aggregates — computed from seed data, not hard-coded
   const totalCalls    = clients.reduce((s, c) => s + c.stats.totalCalls,    0);
   const totalAnswered = clients.reduce((s, c) => s + c.stats.answeredCalls, 0);
   const totalPayments = clients.reduce((s, c) => s + c.stats.payments,      0);
@@ -65,161 +70,195 @@ export default function DashboardPage() {
   const actionItems = priorities
     .filter((p) => p.status !== 'healthy')
     .flatMap((p) =>
-      p.issues.map((iss) => ({ clientId: p.clientId, clientName: p.clientName, status: p.status, ...iss })),
+      p.issues.map((iss) => ({ clientId: p.clientId, clientName: p.clientName, ...iss })),
     );
 
+  const kpis = [
+    { label: 'Total Calls',         value: fmt(totalCalls),      note: '8-week period',              alert: false              },
+    { label: 'Answer Rate',         value: pct(portAnswerPct),   note: 'portfolio avg',              alert: portAnswerPct < 50 },
+    { label: 'Payments',            value: fmt(totalPayments),   note: '8-week period',              alert: false              },
+    { label: 'Payment Conversion',  value: pct(portConvPct),     note: 'of answered',                alert: portConvPct < 35   },
+    { label: 'QA Issues',           value: fmt(totalQA),         note: 'flagged',                    alert: totalQA > 50       },
+    { label: 'Require Attention',   value: String(flaggedCount), note: `of ${clients.length} clients`, alert: flaggedCount > 0 },
+  ];
+
   return (
-    <div className="max-w-[1400px] mx-auto px-6 py-6 space-y-5">
+    <div className="px-6 py-6 max-w-[1300px] space-y-6">
 
       {/* Page heading */}
       <div>
-        <h1 className="text-slate-100 text-xl font-semibold">Portfolio Dashboard</h1>
-        <p className="text-slate-500 text-sm mt-0.5">
-          {clients.length} active clients · 8-week performance summary
+        <h1 className="text-base font-semibold text-foreground">Portfolio Dashboard</h1>
+        <p className="text-xs text-muted-foreground mt-0.5">
+          {clients.length} active clients Â· 8-week performance summary
         </p>
       </div>
 
       {/* Priority Actions */}
       {actionItems.length > 0 && (
-        <section className="bg-slate-900 border border-slate-800 rounded-lg overflow-hidden">
-          <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-800">
-            <span className="text-amber-400 text-base leading-none">⚡</span>
-            <h2 className="text-slate-200 text-sm font-semibold">Priority Actions</h2>
+        <Card>
+          <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
+            <AlertTriangle className="size-3.5 text-amber-400 shrink-0" />
+            <span className="text-sm font-medium text-foreground">Priority Actions</span>
             <div className="ml-auto flex items-center gap-3 text-xs">
-              {critCount > 0 && <span className="text-red-400   font-medium">{critCount} critical</span>}
-              {warnCount > 0 && <span className="text-amber-400 font-medium">{warnCount} need attention</span>}
+              {critCount > 0 && (
+                <span className="text-destructive font-medium">{critCount} critical</span>
+              )}
+              {warnCount > 0 && (
+                <span className="text-amber-400 font-medium">{warnCount} need attention</span>
+              )}
             </div>
           </div>
-          <ul className="divide-y divide-slate-800/50">
+          <div className="divide-y divide-border">
             {actionItems.map((item, i) => (
-              <li key={i} className="flex items-start gap-3 px-4 py-3">
-                <span className={`mt-1 w-2 h-2 rounded-full shrink-0 ${item.severity === 'critical' ? 'bg-red-400' : 'bg-amber-400'}`} />
+              <div key={i} className="flex items-start gap-3 px-4 py-2.5">
+                <span
+                  className={`mt-1.5 size-1.5 rounded-full shrink-0 ${
+                    item.severity === 'critical' ? 'bg-destructive' : 'bg-amber-400'
+                  }`}
+                />
                 <div className="flex-1 min-w-0 text-sm">
-                  <Link href={`/clients/${item.clientId}`} className="font-medium text-slate-200 hover:text-white">
+                  <Link
+                    href={`/clients/${item.clientId}`}
+                    className="font-medium text-foreground hover:underline underline-offset-2"
+                  >
                     {item.clientName}
                   </Link>
-                  <span className="text-slate-600 mx-1.5">—</span>
-                  <span className="text-slate-400">{item.description}</span>
+                  <span className="text-muted-foreground mx-1.5">â€”</span>
+                  <span className="text-muted-foreground">{item.description}</span>
                 </div>
-                <span className={`shrink-0 text-xs font-medium px-1.5 py-0.5 rounded ${
-                  item.severity === 'critical' ? 'bg-red-950 text-red-400' : 'bg-amber-950 text-amber-400'
-                }`}>
+                <span
+                  className={`shrink-0 text-xs font-medium px-1.5 py-0.5 rounded border ${
+                    item.severity === 'critical'
+                      ? 'bg-destructive/10 text-destructive border-destructive/20'
+                      : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                  }`}
+                >
                   {item.severity === 'critical' ? 'Critical' : 'Warning'}
                 </span>
-              </li>
+              </div>
             ))}
-          </ul>
-        </section>
+          </div>
+        </Card>
       )}
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        {[
-          { label: 'Total Calls',         value: fmt(totalCalls),      sub: '8-week period',              alert: false              },
-          { label: 'Answer Rate',         value: pct(portAnswerPct),   sub: 'portfolio average',          alert: portAnswerPct < 50 },
-          { label: 'Payments',            value: fmt(totalPayments),   sub: '8-week period',              alert: false              },
-          { label: 'Payment Conversion',  value: pct(portConvPct),     sub: 'of answered calls',          alert: portConvPct < 35   },
-          { label: 'QA Issues',           value: fmt(totalQA),         sub: 'flagged this period',        alert: totalQA > 50       },
-          { label: 'Requiring Attention', value: String(flaggedCount), sub: `of ${clients.length} clients`, alert: flaggedCount > 0 },
-        ].map(({ label, value, sub, alert }) => (
-          <div
-            key={label}
-            className={`bg-slate-900 rounded-lg px-4 py-4 border ${alert ? 'border-red-900/70' : 'border-slate-800'}`}
-          >
-            <div className={`text-2xl font-semibold font-mono tracking-tight ${alert ? 'text-red-400' : 'text-slate-100'}`}>
-              {value}
-            </div>
-            <div className="text-slate-400 text-xs font-medium mt-1">{label}</div>
-            <div className="text-slate-600 text-xs mt-0.5">{sub}</div>
-          </div>
+      {/* KPI strip */}
+      <div className="grid grid-cols-3 lg:grid-cols-6 gap-3">
+        {kpis.map(({ label, value, note, alert }) => (
+          <Card key={label} size="sm">
+            <CardContent className="px-4 py-3">
+              <p
+                className={`text-xl font-semibold font-mono tracking-tight tabular-nums ${
+                  alert ? 'text-destructive' : 'text-foreground'
+                }`}
+              >
+                {value}
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5 font-medium">{label}</p>
+              <p className="text-xs text-muted-foreground/50 mt-0.5">{note}</p>
+            </CardContent>
+          </Card>
         ))}
       </div>
 
-      {/* Client Portfolio Table */}
-      <section>
+      <Separator />
+
+      {/* Client portfolio table */}
+      <div>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-slate-500 text-xs font-semibold uppercase tracking-widest">Client Portfolio</h2>
-          <span className="text-slate-700 text-xs">sorted by priority · conv. rate = current week</span>
+          <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-widest">
+            Client Portfolio
+          </h2>
+          <span className="text-xs text-muted-foreground/50">
+            sorted by priority Â· conv. rate = current week
+          </span>
         </div>
-        <div className="bg-slate-900 border border-slate-800 rounded-lg overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-slate-800/60 text-slate-500 text-xs uppercase tracking-wider border-b border-slate-800">
-                <th className="text-left   px-4 py-3 font-medium">Client</th>
-                <th className="text-left   px-4 py-3 font-medium">Voicebot</th>
-                <th className="text-right  px-4 py-3 font-medium">Calls</th>
-                <th className="text-right  px-4 py-3 font-medium">Answer Rate</th>
-                <th className="text-right  px-4 py-3 font-medium">Payments</th>
-                <th className="text-right  px-4 py-3 font-medium">Conv. Rate</th>
-                <th className="text-right  px-4 py-3 font-medium">QA Issues</th>
-                <th className="text-center px-4 py-3 font-medium">8W Trend</th>
-                <th className="text-center px-4 py-3 font-medium">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800/40">
+
+        <Card>
+          <Table>
+            <TableHeader>
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="w-[200px]">Client</TableHead>
+                <TableHead>Voicebot</TableHead>
+                <TableHead className="text-right">Calls</TableHead>
+                <TableHead className="text-right">Answer Rate</TableHead>
+                <TableHead className="text-right">Payments</TableHead>
+                <TableHead className="text-right">Conv. Rate</TableHead>
+                <TableHead className="text-right">QA Issues</TableHead>
+                <TableHead className="text-center">8W Trend</TableHead>
+                <TableHead className="text-center">Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {sortedClients.map((client) => {
                 const pri    = priMap[client.id];
                 const cv     = currConv(client);
                 const dp     = deltaPP(client);
-                const isCrit = pri?.status === 'critical';
-                const isWarn = pri?.status === 'needs_attention';
 
                 return (
-                  <tr
-                    key={client.id}
-                    className={`hover:bg-slate-800/20 transition-colors ${isCrit ? 'bg-red-950/5' : isWarn ? 'bg-amber-950/5' : ''}`}
-                  >
-                    <td className="px-4 py-3.5">
+                  <TableRow key={client.id}>
+                    <TableCell>
                       <Link
                         href={`/clients/${client.id}`}
-                        className="font-medium text-slate-200 hover:text-white hover:underline underline-offset-2"
+                        className="font-medium text-foreground hover:underline underline-offset-2"
                       >
                         {client.name}
                       </Link>
-                      <div className="text-slate-600 text-xs mt-0.5">{client.industry}</div>
-                    </td>
+                      <p className="text-xs text-muted-foreground/60 mt-0.5">{client.industry}</p>
+                    </TableCell>
 
-                    <td className="px-4 py-3.5 text-slate-500 text-xs">{vbNames(client.id)}</td>
+                    <TableCell className="text-xs text-muted-foreground">
+                      {vbNames(client.id)}
+                    </TableCell>
 
-                    <td className="px-4 py-3.5 text-right font-mono text-slate-300 tabular-nums">
+                    <TableCell className="text-right font-mono text-sm tabular-nums">
                       {fmt(client.stats.totalCalls)}
-                    </td>
+                    </TableCell>
 
-                    <td className={`px-4 py-3.5 text-right font-mono font-semibold tabular-nums ${answerColor(client.stats.answerRate)}`}>
+                    <TableCell
+                      className={`text-right font-mono text-sm font-medium tabular-nums ${metricColor(client.stats.answerRate, 58, 40)}`}
+                    >
                       {pct(client.stats.answerRate)}
-                    </td>
+                    </TableCell>
 
-                    <td className="px-4 py-3.5 text-right font-mono text-slate-300 tabular-nums">
+                    <TableCell className="text-right font-mono text-sm tabular-nums">
                       {fmt(client.stats.payments)}
-                    </td>
+                    </TableCell>
 
-                    <td className={`px-4 py-3.5 text-right font-mono font-semibold tabular-nums ${convColor(cv)}`}>
+                    <TableCell
+                      className={`text-right font-mono text-sm font-medium tabular-nums ${metricColor(cv, 30, 22)}`}
+                    >
                       {pct(cv)}
-                    </td>
+                    </TableCell>
 
-                    <td className={`px-4 py-3.5 text-right font-mono font-semibold tabular-nums ${qaColor(client.stats.qaIssues)}`}>
+                    <TableCell
+                      className={`text-right font-mono text-sm font-medium tabular-nums ${metricColor(100 - client.stats.qaIssues, 85, 50)}`}
+                    >
                       {client.stats.qaIssues}
-                    </td>
+                    </TableCell>
 
-                    <td className="px-4 py-3.5">
+                    <TableCell className="text-center">
                       <div className="flex flex-col items-center gap-0.5">
                         <SparkLine data={trendData(client)} />
-                        <span className={`text-xs font-mono tabular-nums ${dp < -1 ? 'text-red-400' : dp > 1 ? 'text-emerald-400' : 'text-slate-600'}`}>
+                        <span
+                          className={`text-xs font-mono tabular-nums ${
+                            dp < -1 ? 'text-destructive' : dp > 1 ? 'text-emerald-400' : 'text-muted-foreground/50'
+                          }`}
+                        >
                           {dp >= 0 ? `+${dp.toFixed(0)}` : dp.toFixed(0)}pp
                         </span>
                       </div>
-                    </td>
+                    </TableCell>
 
-                    <td className="px-4 py-3.5 text-center">
+                    <TableCell className="text-center">
                       <StatusBadge status={pri?.status ?? 'healthy'} />
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 );
               })}
-            </tbody>
-          </table>
-        </div>
-      </section>
+            </TableBody>
+          </Table>
+        </Card>
+      </div>
 
     </div>
   );
