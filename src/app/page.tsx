@@ -83,7 +83,7 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="px-6 py-6 max-w-[1300px] space-y-6">
+    <div className="px-6 py-6 space-y-6">
 
       {/* Page heading */}
       <div>

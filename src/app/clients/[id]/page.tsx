@@ -71,7 +71,7 @@ export default async function ClientDetailPage({ params }: Props) {
   ];
 
   return (
-    <div className="px-6 py-6 max-w-[1100px] space-y-5">
+    <div className="px-6 py-6 max-w-5xl space-y-5">
 
       {/* Breadcrumb */}
       <Breadcrumb>
