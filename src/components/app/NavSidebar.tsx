@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 
 const NAV = [
   { label: 'Portfolio',   href: '/',           icon: LayoutDashboard, soon: false },
-  { label: 'QA Review',   href: '/qa',         icon: Phone,           soon: true  },
+  { label: 'QA Review',   href: '/qa',         icon: Phone,           soon: false },
   { label: 'Requests',    href: '/requests',   icon: TicketCheck,     soon: true  },
   { label: 'Compliance',  href: '/compliance', icon: ShieldCheck,     soon: true  },
 ] as const;
@@ -28,7 +28,7 @@ export function NavSidebar() {
 
       <nav className="flex-1 px-2 py-3 space-y-px">
         {NAV.map(({ label, href, icon: Icon, soon }) => {
-          const isActive = pathname === href;
+          const isActive = href === '/' ? pathname === '/' : pathname.startsWith(href);
           return (
             <Link
               key={href}
