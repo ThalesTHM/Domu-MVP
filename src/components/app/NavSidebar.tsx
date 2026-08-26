@@ -9,7 +9,7 @@ const NAV = [
   { label: 'Portfolio',   href: '/',           icon: LayoutDashboard, soon: false },
   { label: 'QA Review',   href: '/qa',         icon: Phone,           soon: false },
   { label: 'Requests',    href: '/requests',   icon: TicketCheck,     soon: false },
-  { label: 'Compliance',  href: '/compliance', icon: ShieldCheck,     soon: true  },
+  { label: 'Compliance',  href: '/compliance', icon: ShieldCheck,     soon: false },
 ] as const;
 
 export function NavSidebar() {
