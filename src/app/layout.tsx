@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Geist_Mono } from "next/font/google";
 import { cookies } from "next/headers";
 import { NavSidebar } from "@/components/app/NavSidebar";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 const inter = Inter({
@@ -46,6 +47,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           <NavSidebar />
           <main className="flex-1 overflow-y-auto">{children}</main>
         </div>
+        <Analytics />
       </body>
     </html>
   );
